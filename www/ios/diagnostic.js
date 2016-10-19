@@ -537,6 +537,24 @@ var Diagnostic = (function(){
 	/*************
 	 * Contacts
 	 *************/
+	/**
+	 * Switch to phone location settings
+	 *
+	 * @param {Function} successCallback - The callback which will be called when switch to settings is successful.
+	 * @param {Function} errorCallback - The callback which will be called when switch to settings encounters an error.
+	 * This callback function is passed a single string parameter containing the error message.
+	 * This works only on iOS 8+. iOS 7 and below will invoke the errorCallback.
+	 */
+	Diagnostic.switchToLocationPhoneSettings = function(successCallback, errorCallback) {
+		return cordova.exec(successCallback,
+			errorCallback,
+			'Diagnostic',
+			'switchToLocationPhoneSettings',
+			[]);
+	};
+
+	return Diagnostic;
+})();
 
 	/**
 	 * Checks if the application is authorized to use contacts (address book).

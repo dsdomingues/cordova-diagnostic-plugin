@@ -545,6 +545,29 @@ ABAddressBookRef _addressBook;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+// Location Phone Settings
+- (void) switchToLocationPhoneSettings: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult;
+    @try {
+        if (UIApplicationOpenSettingsURLString != nil){
+            NSURL *url = [NSURL URLWithString: @"prefs:root=LOCATION_SERVICES"];
+
+            if (![[UIApplication sharedApplication] canOpenURL:url]) {
+                NSLog(@"cannot open phone settings, so let's try on app settings ultimately...");
+                url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+            }
+            [[UIApplication sharedApplication] openURL:url];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        }else{
+          pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Not supported below iOS 8"];
+        }
+    }
+    @catch (NSException *exception) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 // Address Book (Contacts)
 
 - (void) getAddressBookAuthorizationStatus: (CDVInvokedUrlCommand*)command
@@ -854,7 +877,7 @@ ABAddressBookRef _addressBook;
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)authStatus {
     NSString* status = [self getLocationAuthorizationStatusAsString:authStatus];
-    NSLog(@"%@",[NSString stringWithFormat:@"Location authorization status changed to: %@", status]);
+    NSLog([NSString stringWithFormat:@"Location authorization status changed to: %@", status]);
     
     if(self.locationRequestCallbackId != nil){
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
@@ -862,7 +885,7 @@ ABAddressBookRef _addressBook;
         self.locationRequestCallbackId = nil;
     }
     
-    [self jsCallback:[NSString stringWithFormat:@"cordova.plugins.diagnostic._onLocationStateChange(\"%@\");", status]];
+    [self onLocationAuthorizationStatusChange:status]; // Deprecated
 }
 
 - (BOOL) isCameraPresent

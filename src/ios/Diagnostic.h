@@ -61,4 +61,5 @@
 - (void) requestRemindersAuthorization: (CDVInvokedUrlCommand*)command;
 
 - (void) getBackgroundRefreshStatus: (CDVInvokedUrlCommand*)command;
+- (void) switchToLocationPhoneSettings: (CDVInvokedUrlCommand*)command;
 @end
