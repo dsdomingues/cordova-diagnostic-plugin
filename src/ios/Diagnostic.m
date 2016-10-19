@@ -877,7 +877,7 @@ ABAddressBookRef _addressBook;
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)authStatus {
     NSString* status = [self getLocationAuthorizationStatusAsString:authStatus];
-    NSLog([NSString stringWithFormat:@"Location authorization status changed to: %@", status]);
+    NSLog(@"%@",[NSString stringWithFormat:@"Location authorization status changed to: %@", status]);
     
     if(self.locationRequestCallbackId != nil){
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
@@ -885,7 +885,7 @@ ABAddressBookRef _addressBook;
         self.locationRequestCallbackId = nil;
     }
     
-    [self onLocationAuthorizationStatusChange:status]; // Deprecated
+    [self jsCallback:[NSString stringWithFormat:@"cordova.plugins.diagnostic._onLocationStateChange(\"%@\");", status]];
 }
 
 - (BOOL) isCameraPresent
