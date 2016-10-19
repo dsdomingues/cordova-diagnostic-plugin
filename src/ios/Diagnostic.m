@@ -19,13 +19,13 @@
 @implementation Diagnostic
 
 - (void)pluginInitialize {
-    
+
     [super pluginInitialize];
-    
+
     self.locationRequestCallbackId = nil;
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.delegate = self;
-    
+
     self.bluetoothManager = [[CBCentralManager alloc]
                              initWithDelegate:self
                              queue:dispatch_get_main_queue()
@@ -74,7 +74,7 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 
@@ -94,7 +94,7 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 - (void) getLocationAuthorizationStatus: (CDVInvokedUrlCommand*)command
@@ -109,7 +109,7 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 - (void) requestLocationAuthorization: (CDVInvokedUrlCommand*)command
@@ -198,7 +198,7 @@
     @try {
         NSString* status = @"unknown";
         AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-        
+
         if(authStatus == AVAuthorizationStatusDenied || authStatus == AVAuthorizationStatusRestricted){
             status = @"denied";
         }else if(authStatus == AVAuthorizationStatusNotDetermined){
@@ -258,7 +258,7 @@
     CDVPluginResult* pluginResult;
     @try {
         NSString* status = [self getCameraRollAuthorizationStatus];
-        
+
         NSLog([NSString stringWithFormat:@"Camera Roll authorization status is: %@", status]);
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
     }
@@ -307,10 +307,10 @@
     @try {
         if(self.bluetoothEnabled) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:1];
-            
+
         } else {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:0];
-            
+
         }
     }
     @catch (NSException *exception) {
@@ -331,7 +331,7 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 // Settings
@@ -359,7 +359,7 @@
     @try {
 #ifdef __IPHONE_8_0
         AVAudioSessionRecordPermission recordPermission = [AVAudioSession sharedInstance].recordPermission;
-        
+
         if(recordPermission == AVAudioSessionRecordPermissionGranted) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:1];
         }
@@ -394,7 +394,7 @@
                 status = @"not_determined";
                 break;
         }
-        
+
         NSLog([NSString stringWithFormat:@"Microphone authorization status is: %@", status]);
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
 #else
@@ -443,7 +443,7 @@
             UIRemoteNotificationType enabledRemoteNotificationTypes = [UIApplication sharedApplication].enabledRemoteNotificationTypes;
             isEnabled = enabledRemoteNotificationTypes != UIRemoteNotificationTypeNone;
         }
-        
+
         if(isEnabled) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:1];
         } else {
@@ -476,7 +476,7 @@
             badgesEnabled = enabledRemoteNotificationTypes & UIRemoteNotificationTypeBadge;
             soundsEnabled = enabledRemoteNotificationTypes & UIRemoteNotificationTypeSound;
         }
-        
+
         NSMutableDictionary* types = [[NSMutableDictionary alloc]init];
         if(alertsEnabled) {
             [types setValue:@"1" forKey:@"alert"];
@@ -526,6 +526,29 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+// Location Phone Settings
+- (void) switchToLocationPhoneSettings: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult;
+    @try {
+        if (UIApplicationOpenSettingsURLString != nil){
+            NSURL *url = [NSURL URLWithString: @"prefs:root=LOCATION_SERVICES"];
+
+            if (![[UIApplication sharedApplication] canOpenURL:url]) {
+                NSLog(@"cannot open phone settings, so let's try on app settings ultimately...");
+                url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+            }
+            [[UIApplication sharedApplication] openURL:url];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        }else{
+          pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Not supported below iOS 8"];
+        }
+    }
+    @catch (NSException *exception) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 /*********************
  * Internal functions
  *********************/
@@ -563,12 +586,12 @@
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)authStatus {
     NSString* status = [self getLocationAuthorizationStatusAsString:authStatus];
     NSLog([NSString stringWithFormat:@"Location authorization status changed to: %@", status]);
-    
+
     if(self.locationRequestCallbackId != nil){
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.locationRequestCallbackId];
     }
-    
+
     [self onLocationAuthorizationStatusChange:status]; // Deprecated
 }
 
@@ -608,7 +631,7 @@
 {
     PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
     return [self getCameraRollAuthorizationStatusAsString:authStatus];
-    
+
 }
 
 - (NSString*) getCameraRollAuthorizationStatusAsString: (PHAuthorizationStatus)authStatus
@@ -629,18 +652,18 @@
     struct ifaddrs *addresses;
     struct ifaddrs *cursor;
     BOOL wiFiAvailable = NO;
-    
+
     if (getifaddrs(&addresses) != 0) {
         return NO;
     }
-    
+
     cursor = addresses;
     while (cursor != NULL)  {
         if (cursor -> ifa_addr -> sa_family == AF_INET && !(cursor -> ifa_flags & IFF_LOOPBACK)) // Ignore the loopback address
         {
             // Check for WiFi adapter
             if (strcmp(cursor -> ifa_name, "en0") == 0) {
-                
+
                 NSLog(@"Wifi ON");
                 wiFiAvailable = YES;
                 break;
@@ -673,19 +696,19 @@
 - (void) centralManagerDidUpdateState:(CBCentralManager *)central {
     NSString* state;
     NSString* description;
-    
+
     switch(self.bluetoothManager.state)
     {
         case CBCentralManagerStateResetting:
             state = @"resetting";
             description =@"The connection with the system service was momentarily lost, update imminent.";
             break;
-            
+
         case CBCentralManagerStateUnsupported:
             state = @"unsupported";
             description = @"The platform doesn't support Bluetooth Low Energy.";
             break;
-            
+
         case CBCentralManagerStateUnauthorized:
             state = @"unauthorized";
             description = @"The app is not authorized to use Bluetooth Low Energy.";
@@ -704,14 +727,14 @@
             break;
     }
     NSLog(@"Bluetooth state changed: %@",description);
-    
+
     self.bluetoothState = state;
     if([state  isEqual: @"powered_on"]){
         self.bluetoothEnabled = true;
     }else{
         self.bluetoothEnabled = false;
     }
-    
+
     NSString* jsString = [NSString stringWithFormat:@"cordova.plugins.diagnostic._onBluetoothStateChange(\"%@\");", state];
     [self jsCallback:jsString];
 }

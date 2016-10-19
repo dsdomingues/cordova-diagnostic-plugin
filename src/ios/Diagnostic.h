@@ -46,5 +46,5 @@
 - (void) isMicrophoneAuthorized: (CDVInvokedUrlCommand*)command;
 - (void) getMicrophoneAuthorizationStatus: (CDVInvokedUrlCommand*)command;
 - (void) requestMicrophoneAuthorization: (CDVInvokedUrlCommand*)command;
-
+- (void) switchToLocationPhoneSettings: (CDVInvokedUrlCommand*)command;
 @end
