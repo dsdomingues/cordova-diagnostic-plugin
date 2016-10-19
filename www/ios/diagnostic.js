@@ -553,9 +553,6 @@ var Diagnostic = (function(){
 			[]);
 	};
 
-	return Diagnostic;
-})();
-
 	/**
 	 * Checks if the application is authorized to use contacts (address book).
 	 *
